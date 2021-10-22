@@ -8,20 +8,24 @@
         <b v-for="day in days" :key="day">{{ day }}</b>
       </div>
       <div class="days d-flex">
-        <span v-for="blank in nullWeek" :key="blank">&nbsp;</span
-        ><time
+        <span v-for="blank in nullWeek" :key="blank">&nbsp;</span>
+        <time
           v-for="i in daysInMonth"
-          :key="i"
+          :key="i + Math.random()"
           :class="{ currDay: i == currDay, CURR: i == CURR }"
           @click="CURR = i"
-          >{{ i }}</time
-        >
+          >{{ i }}
+        </time>
       </div>
     </div>
 
     <h4>сегодня: {{ new Date().toLocaleDateString() }} г.</h4>
     <h3>
-      темпаратура: <span class="f-28">{{ currentTemp }}</span
+      в {{ cityName }}, {{ region }}, {{ country }}, по координатам: {{ lat }},
+      {{ lon }}
+    </h3>
+    <h3>
+      температура: <span class="f-28">{{ currentTemp }}</span
       >°C
     </h3>
     <h3>
@@ -35,7 +39,7 @@
     <div class="search">
       <v-text-field
         label="Название города"
-        v-model="city"
+        v-model="inputCity"
         hide-details="auto"
         @keydown.enter="getCurrentTemp()"
       ></v-text-field>
@@ -72,7 +76,12 @@ export default {
       CURR: null,
       currentTemp: 0,
       feelsCurrentTemp: 0,
-      city: 'Zhytomyr',
+      inputCity: 'Zhytomyr',
+      cityName: '',
+      region: '',
+      country: '',
+      lat: 0,
+      lon: 0,
     };
   },
   computed: {
@@ -112,14 +121,24 @@ export default {
       this.inst_date = new Date(this.currYear, this.currMonth + 1);
     },
     async getCurrentTemp() {
-      let weatherData = this.weather(this.city);
+      let weatherData = this.weather(this.inputCity);
       let currentWeatherData = await weatherData.then((res) => res);
       if (currentWeatherData.error) {
         this.currentTemp = '---';
         this.feelsCurrentTemp = '---';
+        this.cityName = '---';
+        this.region = '---';
+        this.country = '---';
+        this.lat = '---';
+        this.lon = '---';
       }
       this.currentTemp = currentWeatherData.current.temp_c;
       this.feelsCurrentTemp = currentWeatherData.current.feelslike_c;
+      this.cityName = currentWeatherData.location.name;
+      this.region = currentWeatherData.location.region;
+      this.country = currentWeatherData.location.country;
+      this.lat = currentWeatherData.location.lat;
+      this.lon = currentWeatherData.location.lon;
     },
   },
   mounted() {
