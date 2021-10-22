@@ -20,12 +20,28 @@
     </div>
 
     <h4>сегодня: {{ new Date().toLocaleDateString() }} г.</h4>
-    <h3>темпаратура: {{ currentTemp }}</h3>
-    <h3>чувствуется как: {{ feelsCurrentTemp }}</h3>
+    <h3>
+      темпаратура: <span class="f-28">{{ currentTemp }}</span
+      >°C
+    </h3>
+    <h3>
+      чувствуется как: <span class="f-28">{{ feelsCurrentTemp }}</span
+      >°C
+    </h3>
     <h3>
       выбрано:
       <b v-if="CURR">{{ fixCURR }} {{ months[currMonth] }} {{ currYear }} г.</b>
     </h3>
+    <div class="search">
+      <v-text-field
+        label="Название города"
+        v-model="city"
+        hide-details="auto"
+        @keydown.enter="getCurrentTemp()"
+      ></v-text-field>
+      <v-btn block @click="getCurrentTemp()">Узнать погоду!</v-btn>
+    </div>
+
     <br />
   </div>
 </template>
@@ -56,6 +72,7 @@ export default {
       CURR: null,
       currentTemp: 0,
       feelsCurrentTemp: 0,
+      city: 'Zhytomyr',
     };
   },
   computed: {
@@ -95,8 +112,12 @@ export default {
       this.inst_date = new Date(this.currYear, this.currMonth + 1);
     },
     async getCurrentTemp() {
-      let weatherData = this.weather();
+      let weatherData = this.weather(this.city);
       let currentWeatherData = await weatherData.then((res) => res);
+      if (currentWeatherData.error) {
+        this.currentTemp = '---';
+        this.feelsCurrentTemp = '---';
+      }
       this.currentTemp = currentWeatherData.current.temp_c;
       this.feelsCurrentTemp = currentWeatherData.current.feelslike_c;
     },
@@ -125,12 +146,16 @@ body {
 }
 #app {
   margin: auto;
-  height: 315px;
+  height: 80%;
   flex-direction: column;
 }
 
 .d-flex {
   display: flex;
+}
+
+.f-28 {
+  font-size: 28px;
 }
 
 #calendar {
