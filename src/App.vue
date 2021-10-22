@@ -1,15 +1,17 @@
 <template>
   <div id="app">
-    <WeatherContainer />
+    <WeatherContainer :weather="weatherAPI" />
   </div>
 </template>
 
 <script>
 import WeatherContainer from './components/WeatherContainer.vue';
-
 export default {
   components: {
     WeatherContainer,
+  },
+  props: {
+    weatherAPI: Function,
   },
 };
 </script>
