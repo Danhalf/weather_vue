@@ -21,8 +21,9 @@
 
     <h4>сегодня: {{ new Date().toLocaleDateString() }} г.</h4>
     <h3>
-      в {{ cityName }}, {{ region }}, {{ country }}, по координатам: {{ lat }},
-      {{ lon }}
+      в {{ cityName }}, {{ region }}, {{ country }}, по координатам:
+      {{ currentLatitude }},
+      {{ currentLongitude }}
     </h3>
     <h3>
       температура: <span class="f-28">{{ currentTemp }}</span
@@ -41,9 +42,9 @@
         label="Название города"
         v-model="inputCity"
         hide-details="auto"
-        @keydown.enter="getCurrentTemp()"
+        @keydown.enter="getCurrentWeather(inputCity)"
       ></v-text-field>
-      <v-btn block @click="getCurrentTemp()">Узнать погоду!</v-btn>
+      <v-btn block @click="getCurrentWeather(inputCity)">Узнать погоду!</v-btn>
     </div>
 
     <br />
@@ -80,8 +81,8 @@ export default {
       cityName: '',
       region: '',
       country: '',
-      lat: 0,
-      lon: 0,
+      currentLatitude: 0,
+      currentLongitude: 0,
     };
   },
   computed: {
@@ -120,8 +121,27 @@ export default {
     gtMonth() {
       this.inst_date = new Date(this.currYear, this.currMonth + 1);
     },
-    async getCurrentTemp() {
-      let weatherData = this.weather(this.inputCity);
+    getLocation() {
+      if (!navigator.geolocation) {
+        return;
+      }
+      let options = { timeout: 80000 };
+      navigator.geolocation.getCurrentPosition(
+        this.success,
+        this.error,
+        options
+      );
+    },
+    success(position) {
+      this.currentLatitude = parseFloat(position.coords.latitude).toFixed(2);
+      this.currentLongitude = parseFloat(position.coords.longitude).toFixed(2);
+      this.getCurrentWeather(
+        `${this.currentLatitude},${this.currentLongitude}`
+      );
+    },
+    async getCurrentWeather(location) {
+      console.log(location);
+      let weatherData = this.weather(location);
       let currentWeatherData = await weatherData.then((res) => res);
       if (currentWeatherData.error) {
         this.currentTemp = '---';
@@ -129,20 +149,21 @@ export default {
         this.cityName = '---';
         this.region = '---';
         this.country = '---';
-        this.lat = '---';
-        this.lon = '---';
+        this.currentLatitude = '---';
+        this.currentLongitude = '---';
       }
       this.currentTemp = currentWeatherData.current.temp_c;
       this.feelsCurrentTemp = currentWeatherData.current.feelslike_c;
       this.cityName = currentWeatherData.location.name;
       this.region = currentWeatherData.location.region;
       this.country = currentWeatherData.location.country;
-      this.lat = currentWeatherData.location.lat;
-      this.lon = currentWeatherData.location.lon;
+      this.currentLatitude = currentWeatherData.location.lat;
+      this.currentLongitude = currentWeatherData.location.lon;
     },
   },
   mounted() {
-    this.getCurrentTemp();
+    // this.getCurrentWeather();
+    this.getLocation();
   },
 };
 </script>
@@ -203,6 +224,10 @@ time {
 time {
   cursor: pointer;
 }
+
+.not-data {
+}
+
 time:hover {
   color: #fff;
   border-radius: 50%;
