@@ -113,6 +113,7 @@ export default {
     nullWeek() {
       return new Date(this.currYear, this.currMonth, 0).getDay();
     },
+
   },
   methods: {
     ltMonth() {
@@ -160,10 +161,15 @@ export default {
       this.currentLatitude = currentWeatherData.location.lat;
       this.currentLongitude = currentWeatherData.location.lon;
     },
+    getFullDate() {
+      //TODO rewrite this func
+      return `${this.currYear}-${this.currMonth}-${this.currDay + 2}`
+    }
   },
   mounted() {
     // this.getCurrentWeather();
     this.getLocation();
+    console.log(this.getFullDate())
   },
 };
 </script>
